@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Isaiah 61 예배 순서 구성 실습</title>
+<style>
+  :root{
+    --gold:#fbbf24; --gold2:#fde68a;
+    --paper:#fffdf7; --line:#e5e7eb;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",Segoe UI,Roboto,Arial,sans-serif;
+    background:radial-gradient(circle at top right,#334155 0,#0f172a 35%,#020617 100%);
+    color:#f8fafc;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+
+  /* ── 헤더 ── */
+  header{
+    padding:7px 14px;
+    background:rgba(15,23,42,.95);
+    border-bottom:1px solid rgba(255,255,255,.1);
+    display:flex;align-items:center;gap:12px;flex-shrink:0;flex-wrap:wrap;
+  }
+  .eyebrow{color:var(--gold2);font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+  h1{font-size:15px;margin-top:1px}
+  .toolbar{display:flex;gap:5px;flex-wrap:wrap;margin-left:auto}
+  .btn{border:0;border-radius:999px;padding:5px 11px;font-size:11px;font-weight:800;cursor:pointer;background:#fff;color:#0f172a;transition:.12s}
+  .btn:hover{opacity:.82}
+  .btn.gold{background:var(--gold);color:#111}
+  .btn.blue{background:#38bdf8;color:#0c1a2b}
+  .btn.green{background:#34d399;color:#052e16}
+  .btn.slate{background:#475569;color:#fff}
+  .btn.red{background:#ef4444;color:#fff}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.25);color:#fff}
+
+  /* ── 메인 레이아웃 ── */
+  .body{display:flex;flex-direction:column;flex:1;overflow:hidden}
+
+  /* ── 상단: 카드 팔레트 ── */
+  .top{
+    flex-shrink:0;
+    background:rgba(15,23,42,.75);
+    border-bottom:2px solid rgba(255,255,255,.12);
+    display:flex;flex-direction:column;
+  }
+  .filters{display:flex;gap:5px;flex-wrap:wrap;padding:6px 12px;border-bottom:1px solid rgba(255,255,255,.07)}
+  .chip{border:1px solid rgba(255,255,255,.16);background:#1e293b;color:#e2e8f0;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
+  .chip.active{background:var(--gold);color:#111;border-color:var(--gold)}
+
+  .cards{display:flex;flex-wrap:nowrap;gap:6px;padding:7px 12px 9px;overflow-x:auto;overflow-y:hidden}
+  .cards::-webkit-scrollbar{height:3px}
+  .cards::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
+
+  .card{
+    flex-shrink:0;width:108px;
+    background:linear-gradient(180deg,#1e293b,#111827);
+    border:2px solid rgba(255,255,255,.1);
+    border-radius:9px;padding:7px 9px;
+    cursor:pointer;transition:.12s;text-align:left;color:#fff;
+  }
+  .card:hover{border-color:var(--gold);transform:translateY(-2px)}
+  .card.selected{border-color:#34d399;background:linear-gradient(180deg,#064e3b,#022c22)}
+  .card .cat{display:inline-block;font-size:8px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#111;border-radius:999px;padding:2px 5px;margin-bottom:4px}
+  .card h3{font-size:11px;line-height:1.35;font-weight:700}
+  .card .en{color:#94a3b8;font-size:9px;margin-top:2px}
+  .card.addCustom{border-style:dashed;border-color:rgba(255,255,255,.32)}
+  .card.addCustom:hover{border-color:var(--gold)}
+
+  .cat-Pre{background:#a5b4fc!important}
+  .cat-Gathering{background:#bae6fd!important}
+  .cat-Praise{background:#fde68a!important}
+  .cat-Confession{background:#fecaca!important}
+  .cat-Word{background:#bbf7d0!important}
+  .cat-Response{background:#ddd6fe!important}
+  .cat-Table{background:#fed7aa!important}
+  .cat-Sending{background:#c7d2fe!important}
+  .cat-Pastoral{background:#fbcfe8!important}
+  .cat-Formation{background:#ccfbf1!important}
+  .cat-Custom{background:#e2e8f0!important}
+
+  /* ── 안내 바 ── */
+  .hint{
+    flex-shrink:0;
+    padding:6px 14px;
+    font-size:10.5px;color:#94a3b8;
+    background:rgba(15,23,42,.5);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .hint b{color:#fde68a;font-weight:800}
+
+  /* ── 하단: 순서 비교 보드 ── */
+  .bottom{
+    flex:1;
+    background:#0a1628;
+    display:flex;flex-direction:column;
+    overflow:hidden;
+  }
+  .board{
+    flex:1;
+    display:flex;gap:14px;
+    padding:12px 14px;
+    overflow-x:auto;overflow-y:hidden;
+  }
+  .board::-webkit-scrollbar{height:5px}
+  .board::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
+
+  .col{
+    flex-shrink:0;width:236px;
+    display:flex;flex-direction:column;
+    background:rgba(15,23,42,.55);
+    border:2px solid rgba(255,255,255,.09);
+    border-radius:12px;
+    overflow:hidden;
+  }
+  .col.active{border-color:var(--gold);box-shadow:0 0 0 1px rgba(251,191,36,.35)}
+  .colHead{
+    display:flex;align-items:flex-start;justify-content:space-between;gap:6px;
+    padding:9px 10px 3px;cursor:pointer;
+  }
+  .colName{
+    font-size:13px;font-weight:800;color:#f8fafc;cursor:text;
+    text-decoration:underline dotted rgba(255,255,255,.28);text-underline-offset:3px;
+    line-height:1.3;
+  }
+  .colBtns{display:flex;gap:3px;flex-shrink:0}
+  .mbtn{border:0;border-radius:6px;padding:3px 6px;font-size:10px;font-weight:800;background:#334155;color:#e2e8f0;cursor:pointer}
+  .mbtn:hover{background:#475569}
+  .mbtn.danger{background:#7f1d1d;color:#fecaca}
+  .mbtn.danger:hover{background:#991b1b}
+  .colSub{font-size:10px;color:#64748b;padding:0 10px 7px}
+  .colList{flex:1;overflow-y:auto;padding:0 8px 10px;display:flex;flex-direction:column}
+  .colList::-webkit-scrollbar{width:4px}
+  .colList::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
+
+  .gap{
+    height:9px;border:0;background:transparent;
+    cursor:pointer;border-radius:4px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:9px;font-weight:800;color:transparent;
+  }
+  .gap:hover{color:#fde68a;background:rgba(251,191,36,.1)}
+
+  .rowSlot{
+    display:flex;align-items:center;gap:8px;
+    min-height:34px;border-radius:8px;padding:5px 8px;cursor:pointer;
+  }
+  .rowSlot.empty{border:1.5px dashed rgba(255,255,255,.16);color:rgba(255,255,255,.28)}
+  .rowSlot.empty:hover{border-color:rgba(255,255,255,.4)}
+  .rowSlot.empty.targeted{border-color:var(--gold);background:rgba(251,191,36,.12);color:#fde68a}
+  .rowSlot.filled{background:#fff;color:#1e293b;box-shadow:0 2px 6px rgba(0,0,0,.28)}
+  .rowSlot.filled:hover{transform:translateX(2px)}
+  .rNum{
+    flex-shrink:0;width:18px;height:18px;border-radius:5px;
+    background:#1e293b;color:#fff;font-size:9px;font-weight:900;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .rowSlot.empty .rNum{background:rgba(255,255,255,.1);color:rgba(255,255,255,.4)}
+  .rTitle{flex:1;font-size:11.5px;font-weight:700;line-height:1.3;word-break:keep-all}
+  .rEmptyLabel{flex:1;font-size:9.5px}
+  .rCat{flex-shrink:0;font-size:8px;font-weight:900;border-radius:999px;padding:2px 6px;color:#111;white-space:nowrap}
+
+  .addCol{
+    flex-shrink:0;width:108px;align-self:stretch;
+    border:2px dashed rgba(255,255,255,.2);border-radius:12px;
+    background:transparent;color:rgba(255,255,255,.55);
+    font-size:12px;font-weight:800;cursor:pointer;line-height:1.5;
+  }
+  .addCol:hover{border-color:var(--gold);color:var(--gold)}
+  .addCol small{display:block;font-weight:400;font-size:9.5px;color:rgba(255,255,255,.35);margin-top:2px}
+
+  @media print{
+    body{background:white;height:auto;overflow:visible}
+    header,.top,.hint,.gap,.addCol,.colBtns{display:none!important}
+    .bottom{overflow:visible;background:white}
+    .board{overflow:visible;flex-wrap:wrap;padding:6px}
+    .col{background:white;border:1px solid #cbd5e1;box-shadow:none;break-inside:avoid}
+    .col.active{border-color:#cbd5e1;box-shadow:none}
+    .colName{color:#111}
+    .colSub{color:#555}
+    .colList{overflow:visible}
+    .rowSlot.filled{background:white;border:1px solid #1e293b;box-shadow:none;color:#111}
+    .rowSlot.empty{display:none}
+    .rNum{background:#1e293b;color:white}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="eyebrow">Isaiah 61 Worship Planning Lab</div>
+    <h1>예배 순서 구성 실습</h1>
+  </div>
+  <div class="toolbar">
+    <button class="btn gold"  onclick="loadTemplate('traditional')">전통적 예배</button>
+    <button class="btn blue"  onclick="loadTemplate('blended')">블렌디드 예배</button>
+    <button class="btn green" onclick="loadTemplate('contemporary')">현대적 예배</button>
+    <button class="btn"       onclick="loadTemplate('withCommunion')">성찬 포함형</button>
+    <button class="btn"       onclick="loadTemplate('withBaptism')">세례 포함형</button>
+    <button class="btn red"   onclick="clearOrder()">전체 초기화</button>
+    <button class="btn"       onclick="copyOrder()">전체 복사</button>
+    <button class="btn ghost" onclick="window.print()">인쇄</button>
+  </div>
+</header>
+
+<div class="body">
+  <!-- 상단: 카드 팔레트 -->
+  <div class="top">
+    <div class="filters" id="filters"></div>
+    <div class="cards" id="cards"></div>
+  </div>
+
+  <div class="hint">
+    <b>카드 클릭</b>=현재 활성 순서(금색 테두리)에 배치 · <b>빈 칸 클릭</b>=그 자리를 지정한 뒤 카드 클릭 · <b>채워진 칸 클릭</b>=제거 ·
+    <b>칸 사이 여백</b>=마우스를 올려 ＋ 클릭하면 그 위치에 빈 칸 삽입 · <b>정렬</b>=빈 칸을 뒤로 몰아 이빨빠짐 정리 · 최대 4개 순서까지 나란히 비교
+  </div>
+
+  <!-- 하단: 순서 비교 보드 -->
+  <div class="bottom">
+    <div class="board" id="board"></div>
+  </div>
+</div>
+
+<div id="toast" style="position:fixed;right:14px;bottom:14px;background:#111827;color:white;border:1px solid rgba(255,255,255,.15);padding:9px 14px;border-radius:10px;font-size:12px;opacity:0;transform:translateY(6px);transition:.2s;z-index:99"></div>
+
+<script>
+/* ───────── 데이터 ───────── */
+const elements=[
+ {id:'pre-praise',title:'경배와 찬양',en:'Pre-Worship Praise (3-4곡)',cat:'Pre'},
+ {id:'pre-silence',title:'예전적 고요함',en:'Liturgical Silence',cat:'Pre'},
+ {id:'pre-prelude',title:'프릴루드 / 연주',en:'Prelude / Instrumental',cat:'Pre'},
+ {id:'pre-fellow',title:'자유로운 교제',en:'Fellowship / Open Gathering',cat:'Pre'},
+ {id:'call',title:'예배로의 부름',en:'Call to Worship',cat:'Gathering'},
+ {id:'greeting',title:'예전적 인사',en:'Liturgical Greeting',cat:'Gathering'},
+ {id:'votum',title:'개회 선언',en:'Votum',cat:'Gathering'},
+ {id:'openingPrayer',title:'개회 기도',en:'Opening Prayer',cat:'Gathering'},
+ {id:'openingHymn',title:'개회 찬송',en:'Opening Hymn',cat:'Praise'},
+ {id:'praiseSet',title:'찬양 묶음',en:'Songs of Praise',cat:'Praise'},
+ {id:'psalm',title:'시편 찬송 / 교독',en:'Psalmody',cat:'Praise'},
+ {id:'worshipSong',title:'경배 & 찬양',en:'Worship & Praise',cat:'Praise'},
+ {id:'gloria',title:'영광송 / 감사 찬송',en:'Gloria',cat:'Praise'},
+ {id:'law',title:'하나님의 뜻 선포',en:"God's Will",cat:'Confession'},
+ {id:'confession',title:'참회의 기도',en:'Prayer of Confession',cat:'Confession'},
+ {id:'silentConfession',title:'침묵 참회',en:'Silent Confession',cat:'Confession'},
+ {id:'kyrie',title:'키리에',en:'Kyrie Eleison',cat:'Confession'},
+ {id:'assurance',title:'사죄의 선언',en:'Assurance of Pardon',cat:'Confession'},
+ {id:'illumination',title:'조명 기도',en:'Prayer for Illumination',cat:'Word'},
+ {id:'oldTestament',title:'구약 봉독',en:'OT Reading',cat:'Word'},
+ {id:'epistle',title:'서신서 봉독',en:'Epistle Reading',cat:'Word'},
+ {id:'gospel',title:'복음서 봉독',en:'Gospel Reading',cat:'Word'},
+ {id:'scripture',title:'성경 봉독',en:'Scripture Reading',cat:'Word'},
+ {id:'sermon',title:'설교',en:'Sermon',cat:'Word'},
+ {id:'sermonResponse',title:'말씀 응답 찬송',en:'Hymn of Response',cat:'Response'},
+ {id:'creed',title:'신앙고백',en:'Creed',cat:'Response'},
+ {id:'peace',title:'평화의 인사',en:'Passing of the Peace',cat:'Response'},
+ {id:'intercession',title:'중보기도',en:'Prayers of the People',cat:'Response'},
+ {id:'lordPrayer',title:'주기도문',en:"Lord's Prayer",cat:'Response'},
+ {id:'offering',title:'봉헌',en:'Offering',cat:'Response'},
+ {id:'doxology',title:'봉헌송 / 송영',en:'Doxology',cat:'Response'},
+ {id:'offeringPrayer',title:'봉헌 기도',en:'Prayer of Dedication',cat:'Response'},
+ {id:'baptism',title:'세례',en:'Baptism',cat:'Response'},
+ {id:'communionInvitation',title:'성찬 초대',en:'Invitation to Table',cat:'Table'},
+ {id:'greatThanksgiving',title:'대감사기도',en:'Great Thanksgiving',cat:'Table'},
+ {id:'wordsInstitution',title:'성찬 제정사',en:'Words of Institution',cat:'Table'},
+ {id:'fraction',title:'떡을 뗌',en:'Breaking of Bread',cat:'Table'},
+ {id:'communion',title:'성찬 분배',en:'Communion',cat:'Table'},
+ {id:'postCommunion',title:'성찬 후 감사기도',en:'Post-Communion Prayer',cat:'Table'},
+ {id:'announcement',title:'광고 / 교회 소식',en:'Announcements',cat:'Pastoral'},
+ {id:'children',title:'어린이 메시지',en:"Children's Message",cat:'Pastoral'},
+ {id:'testimony',title:'간증',en:'Testimony',cat:'Pastoral'},
+ {id:'membership',title:'입교 / 회원 영접',en:'Profession / Reception',cat:'Pastoral'},
+ {id:'missionReport',title:'선교 보고',en:'Mission Report',cat:'Pastoral'},
+ {id:'healingPrayer',title:'치유 기도',en:'Prayer for Healing',cat:'Pastoral'},
+ {id:'blessingChildren',title:'다음세대 축복',en:'Blessing of Children',cat:'Pastoral'},
+ {id:'silence',title:'침묵',en:'Silence',cat:'Formation'},
+ {id:'lament',title:'탄식 기도',en:'Prayer of Lament',cat:'Formation'},
+ {id:'closingHymn',title:'파송 찬송',en:'Sending Hymn',cat:'Sending'},
+ {id:'charge',title:'파송의 말씀',en:'Charge',cat:'Sending'},
+ {id:'benediction',title:'축도',en:'Benediction',cat:'Sending'},
+ {id:'postlude',title:'후주',en:'Postlude',cat:'Sending'}
+];
+
+const cats=['All','Pre','Gathering','Praise','Confession','Word','Response','Table','Pastoral','Formation','Sending','Custom'];
+const catKo={All:'전체',Pre:'예배전 환경',Gathering:'모임',Praise:'찬양',Confession:'참회/용서',Word:'말씀',Response:'응답',Table:'성찬',Pastoral:'목회/공동체',Formation:'형성',Sending:'파송',Custom:'기타'};
+const catBg={Pre:'#a5b4fc',Gathering:'#bae6fd',Praise:'#fde68a',Confession:'#fecaca',Word:'#bbf7d0',Response:'#ddd6fe',Table:'#fed7aa',Sending:'#c7d2fe',Pastoral:'#fbcfe8',Formation:'#ccfbf1',Custom:'#e2e8f0'};
+
+const templates={
+ traditional:{pre:['pre-prelude'],main:['call','votum','openingHymn','psalm','law','confession','assurance','gloria','illumination','oldTestament','epistle','scripture','sermon','creed','intercession','lordPrayer','offering','doxology','offeringPrayer','announcement','closingHymn','benediction','postlude'],name:'전통적 예배'},
+ blended:{pre:['pre-praise'],main:['call','praiseSet','openingPrayer','confession','assurance','gloria','illumination','scripture','sermon','sermonResponse','creed','intercession','offering','doxology','announcement','closingHymn','benediction'],name:'블렌디드 예배'},
+ contemporary:{pre:['pre-praise','pre-fellow'],main:['openingPrayer','children','scripture','sermon','sermonResponse','intercession','offering','doxology','announcement','closingHymn','benediction'],name:'현대적 예배'},
+ withCommunion:{pre:['pre-prelude','pre-silence'],main:['call','openingHymn','confession','assurance','illumination','oldTestament','scripture','sermon','creed','intercession','offering','communionInvitation','greatThanksgiving','wordsInstitution','fraction','communion','postCommunion','announcement','closingHymn','benediction'],name:'성찬 포함형 예배'},
+ withBaptism:{pre:['pre-prelude'],main:['call','openingHymn','openingPrayer','illumination','scripture','sermon','sermonResponse','baptism','creed','intercession','offering','doxology','announcement','closingHymn','benediction'],name:'세례 포함형 예배'}
+};
+
+/* ───────── 상태 ───────── */
+let active='All';
+let idCounter=0;
+function genId(){return 'ord'+(++idCounter)+'_'+Date.now();}
+function defaultOrders(){
+  return [
+    {id:genId(),name:'전예배',slots:Array(4).fill(null)},
+    {id:genId(),name:'본예배 순서 1',slots:Array(14).fill(null)}
+  ];
+}
+let orders=defaultOrders();
+let activeOrderIndex=1;
+let target=null; // {oi, idx}
+
+function $(id){return document.getElementById(id)}
+function escapeHtml(str){return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+/* ───────── 카드 팔레트 ───────── */
+function renderFilters(){
+  $('filters').innerHTML=cats.map(c=>`<button class="chip ${active===c?'active':''}" onclick="setCat('${c}')">${catKo[c]}</button>`).join('');
+}
+function setCat(c){active=c;renderFilters();renderCards();}
+
+function selectedIds(){
+  const o=orders[activeOrderIndex];
+  return new Set(o?o.slots.filter(Boolean).map(s=>s.id):[]);
+}
+
+function renderCards(){
+  const list=active==='All'?elements:elements.filter(e=>e.cat===active);
+  const sel=selectedIds();
+  let html=list.map(e=>`<button class="card${sel.has(e.id)?' selected':''}" onclick="toggle('${e.id}')">
+    <span class="cat cat-${e.cat}">${catKo[e.cat]||e.cat}</span>
+    <h3>${escapeHtml(e.title)}</h3>
+    <div class="en">${e.en||''}</div>
+  </button>`).join('');
+  html+=`<button class="card addCustom" onclick="addCustomItem()">
+    <span class="cat" style="background:#fde68a">＋ 추가</span>
+    <h3>기타 항목 추가</h3>
+    <div class="en">이름을 직접 입력</div>
+  </button>`;
+  $('cards').innerHTML=html;
+}
+
+function toggle(id){
+  const oi=activeOrderIndex;
+  const o=orders[oi];
+  if(!o)return;
+  const idx=o.slots.findIndex(s=>s&&s.id===id);
+  if(idx!==-1){
+    o.slots[idx]=null;
+    if(target&&target.oi===oi&&target.idx===idx)target=null;
+    renderBoard();renderCards();
+    return;
+  }
+  const el=elements.find(x=>x.id===id);
+  if(!el)return;
+  let placeIdx;
+  if(target&&target.oi===oi&&o.slots[target.idx]===null){
+    placeIdx=target.idx;
+  } else {
+    placeIdx=o.slots.findIndex(s=>s===null);
+  }
+  if(placeIdx===-1){
+    showToast(`"${o.name}"에 빈 칸이 없습니다. 칸 사이 ＋ 를 눌러 빈 칸을 추가하세요.`);
+    return;
+  }
+  o.slots[placeIdx]={...el};
+  target=null;
+  renderBoard();renderCards();
+}
+
+function addCustomItem(){
+  const name=prompt('추가할 예전 요소의 이름을 입력하세요 (예: 특별찬양, 헌시 낭독 등)');
+  if(!name||!name.trim())return;
+  const id='custom-'+Date.now()+'_'+Math.floor(Math.random()*1000);
+  const el={id,title:name.trim(),en:'',cat:'Custom'};
+  elements.push(el);
+  const oi=activeOrderIndex;
+  const o=orders[oi];
+  let placeIdx=(target&&target.oi===oi&&o.slots[target.idx]===null)?target.idx:o.slots.findIndex(s=>s===null);
+  if(placeIdx===-1){
+    showToast(`"${name}" 항목이 카드 목록(기타)에 추가되었습니다. 배치하려면 빈 칸을 먼저 만들어주세요.`);
+  } else {
+    o.slots[placeIdx]={...el};
+    target=null;
+    showToast(`"${name}" 항목이 추가되어 배치되었습니다.`);
+  }
+  renderBoard();renderCards();
+}
+
+/* ───────── 순서 비교 보드 ───────── */
+function renderBoard(){
+  const cols=orders.map((o,oi)=>{
+    const isActive=oi===activeOrderIndex;
+    const filled=o.slots.filter(Boolean).length;
+    const rows=[gapHtml(oi,0)];
+    o.slots.forEach((s,i)=>{
+      rows.push(slotHtml(oi,i,s));
+      rows.push(gapHtml(oi,i+1));
+    });
+    return `<div class="col${isActive?' active':''}" onclick="setActiveOrder(${oi})">
+      <div class="colHead">
+        <div class="colName" title="클릭하여 이름 변경" onclick="event.stopPropagation();renameOrder(${oi})">${escapeHtml(o.name)}</div>
+        <div class="colBtns">
+          <button class="mbtn" onclick="event.stopPropagation();compactOrder(${oi})" title="빈 칸을 뒤로 몰아 정렬">정렬</button>
+          <button class="mbtn" onclick="event.stopPropagation();addSlotToOrder(${oi})" title="맨 끝에 슬롯 추가">＋</button>
+          <button class="mbtn" onclick="event.stopPropagation();removeSlotFromOrder(${oi})" title="맨 끝 슬롯 제거">－</button>
+          <button class="mbtn danger" onclick="event.stopPropagation();removeOrderColumn(${oi})" title="이 순서 전체 삭제">✕</button>
+        </div>
+      </div>
+      <div class="colSub">${filled}개 배치됨 / ${o.slots.length}칸</div>
+      <div class="colList">${rows.join('')}</div>
+    </div>`;
+  }).join('');
+  const addBtn=orders.length<4?`<button class="addCol" onclick="addOrderColumn()">＋<br>순서 추가<small>비교할 예배 순서를 더 만들기 (최대 4개)</small></button>`:'';
+  $('board').innerHTML=cols+addBtn;
+}
+
+function gapHtml(oi,pos){
+  const t=target;
+  return `<button class="gap" onclick="event.stopPropagation();insertGap(${oi},${pos})" title="여기에 빈 칸 삽입">＋</button>`;
+}
+function slotHtml(oi,i,s){
+  const isTarget=target&&target.oi===oi&&target.idx===i;
+  if(!s){
+    return `<div class="rowSlot empty${isTarget?' targeted':''}" onclick="event.stopPropagation();slotClick(${oi},${i})">
+      <span class="rNum">${i+1}</span>
+      <span class="rEmptyLabel">${isTarget?'여기에 배치할 카드를 클릭하세요':'빈 칸 (클릭하여 위치 지정)'}</span>
+    </div>`;
+  }
+  return `<div class="rowSlot filled" onclick="event.stopPropagation();slotClick(${oi},${i})" title="클릭하여 제거">
+    <span class="rNum">${i+1}</span>
+    <span class="rTitle">${escapeHtml(s.title)}</span>
+    <span class="rCat" style="background:${catBg[s.cat]||'#e2e8f0'}">${catKo[s.cat]||s.cat}</span>
+  </div>`;
+}
+
+function setActiveOrder(oi){activeOrderIndex=oi;renderBoard();renderCards();}
+
+function slotClick(oi,idx){
+  activeOrderIndex=oi;
+  const o=orders[oi];
+  const s=o.slots[idx];
+  if(s){
+    o.slots[idx]=null;
+    if(target&&target.oi===oi&&target.idx===idx)target=null;
+    renderBoard();renderCards();
+    return;
+  }
+  if(target&&target.oi===oi&&target.idx===idx){target=null;}
+  else{target={oi,idx};}
+  renderBoard();renderCards();
+}
+
+function insertGap(oi,pos){
+  orders[oi].slots.splice(pos,0,null);
+  if(target&&target.oi===oi&&target.idx>=pos)target.idx++;
+  renderBoard();
+}
+function compactOrder(oi){
+  const o=orders[oi];
+  const filled=o.slots.filter(Boolean);
+  const emptyCount=o.slots.length-filled.length;
+  o.slots=filled.concat(Array(emptyCount).fill(null));
+  if(target&&target.oi===oi)target=null;
+  renderBoard();
+  showToast(`"${o.name}" 순서를 정렬했습니다.`);
+}
+function addSlotToOrder(oi){orders[oi].slots.push(null);renderBoard();}
+function removeSlotFromOrder(oi){
+  const o=orders[oi];
+  if(o.slots.length<=1)return;
+  const last=o.slots[o.slots.length-1];
+  if(last!==null){if(!confirm('마지막 칸의 항목이 사라집니다. 제거할까요?'))return;}
+  o.slots.pop();
+  if(target&&target.oi===oi&&target.idx>=o.slots.length)target=null;
+  renderBoard();
+}
+function renameOrder(oi){
+  const o=orders[oi];
+  const name=prompt('순서 이름을 입력하세요',o.name);
+  if(name&&name.trim()){o.name=name.trim();renderBoard();}
+}
+function addOrderColumn(){
+  if(orders.length>=4){showToast('비교는 최대 4개 순서까지 가능합니다.');return;}
+  orders.push({id:genId(),name:`본예배 순서 ${orders.length}`,slots:Array(10).fill(null)});
+  activeOrderIndex=orders.length-1;
+  renderBoard();renderCards();
+}
+function removeOrderColumn(oi){
+  if(orders.length<=1){showToast('최소 1개의 순서는 남아있어야 합니다.');return;}
+  const o=orders[oi];
+  if(o.slots.some(Boolean)){if(!confirm(`"${o.name}" 순서를 삭제할까요? 채워진 내용이 모두 사라집니다.`))return;}
+  orders.splice(oi,1);
+  if(activeOrderIndex>=orders.length)activeOrderIndex=orders.length-1;
+  if(target&&target.oi===oi)target=null;
+  renderBoard();renderCards();
+}
+
+/* ───────── 전역 동작 ───────── */
+function clearOrder(){
+  if(confirm('모든 순서 구성을 초기화할까요? (직접 추가한 "기타" 카드는 목록에 유지됩니다)')){
+    orders=defaultOrders();
+    activeOrderIndex=1;
+    target=null;
+    render();
+  }
+}
+function loadTemplate(k){
+  const t=templates[k];if(!t)return;
+  const preSlots=Array(Math.max(t.pre.length,4)).fill(null);
+  t.pre.forEach((id,i)=>{const e=elements.find(x=>x.id===id);if(e)preSlots[i]={...e};});
+  const mainSlots=Array(Math.max(t.main.length,14)).fill(null);
+  t.main.forEach((id,i)=>{const e=elements.find(x=>x.id===id);if(e)mainSlots[i]={...e};});
+  orders=[
+    {id:genId(),name:'전예배',slots:preSlots},
+    {id:genId(),name:t.name,slots:mainSlots}
+  ];
+  activeOrderIndex=1;target=null;
+  render();
+}
+function copyOrder(){
+  const lines=[];
+  orders.forEach(o=>{
+    lines.push(`[ ${o.name} ]`);
+    const filled=o.slots.filter(Boolean);
+    if(!filled.length){lines.push('(비어 있음)');}
+    else filled.forEach((e,i)=>lines.push(`${i+1}. ${e.title}${e.en?` (${e.en})`:''}`));
+    lines.push('');
+  });
+  navigator.clipboard.writeText(lines.join('\n').trim()).then(()=>showToast('전체 순서가 복사되었습니다.'));
+}
+function showToast(msg){
+  const t=$('toast');t.textContent=msg;
+  t.style.opacity='1';t.style.transform='translateY(0)';
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(6px)'},2400);
+}
+function render(){renderFilters();renderCards();renderBoard();}
+render();
+</script>
+</body>
+</html>
